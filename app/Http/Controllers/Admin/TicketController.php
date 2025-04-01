@@ -34,7 +34,9 @@ class TicketController extends Controller
 
     public function show($id)
     {
-        $ticket = Ticket::with(['respostas.user', 'user'])->findOrFail($id);
+        $ticket = Ticket::with(['respostas' => function ($query) {
+            $query->orderBy('created_at', 'asc');
+        }, 'respostas.user'])->findOrFail($id);        
 
         return view('admin.tickets.show', compact('ticket'));
     }

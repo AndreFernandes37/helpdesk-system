@@ -12,8 +12,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('notificacoes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ticket_id')->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->uuid('ticket_id');
+            $table->foreign('ticket_id')->references('id')->on('tickets')->onDelete('cascade');
             $table->text('content');
             $table->boolean('visualizada')->default(false);
             $table->timestamps();

@@ -11,7 +11,7 @@
 
         <div class="border rounded p-4 bg-white shadow">
             <h3 class="text-lg font-bold">{{ $ticket->title }}</h3>
-            <p><strong>Cliente:</strong> {{ $ticket->user->username }}</p>
+            <p><strong>Cliente:</strong> {{ $ticket->user->name }}</p>
             <p><strong>Status:</strong> {{ ucfirst($ticket->status) }}</p>
             <p><strong>Prioridade:</strong> {{ ucfirst($ticket->priority) }}</p>
             <p><strong>Descrição:</strong><br>{{ $ticket->description }}</p>
@@ -36,7 +36,12 @@
 
         <h4 class="text-md font-semibold">Respostas</h4>
 
-        <div class="space-y-3 mt-6">
+        <div x-data x-init="$nextTick(() => {
+            const bottom = document.getElementById('scroll-bottom');
+            bottom?.scrollIntoView({ behavior: 'auto' });
+        })"
+             class="h-[400px] overflow-y-auto space-y-3 mt-6 pr-2">
+            
             @forelse ($ticket->respostas as $resposta)
                 <div class="flex items-start gap-3
                     @if ($resposta->user_id === auth()->id())
@@ -45,13 +50,14 @@
                         justify-start
                     @endif
                 ">
-                    {{-- Avatar com iniciais --}}
+                    {{-- Avatar --}}
                     @if ($resposta->user_id !== auth()->id())
-                        <div class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full text-sm font-bold dark:bg-blue-400">
+                        <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-blue-400">
                             {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
                         </div>
                     @endif
         
+                    {{-- Balão de mensagem --}}
                     <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow
                         @if ($resposta->user_id === auth()->id())
                             bg-green-500 text-white rounded-br-none dark:bg-green-600
@@ -68,17 +74,19 @@
                         <p class="text-sm leading-snug">{{ $resposta->content }}</p>
                     </div>
         
-                    {{-- Avatar do utilizador logado (à direita) --}}
                     @if ($resposta->user_id === auth()->id())
-                        <div class="flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-full text-sm font-bold dark:bg-green-400">
+                        <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-green-400">
                             {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
                         </div>
                     @endif
                 </div>
             @empty
-                <p class="text-gray-600 dark:text-gray-300">Ainda não há respostas para este ticket.</p>
+                <p class="text-gray-600 dark:text-gray-300">Nenhuma resposta ainda.</p>
             @endforelse
+        
+            <div id="scroll-bottom"></div>
         </div>
+        
 
         <form action="{{ route('admin.tickets.reply', $ticket->id) }}" method="POST" class="space-y-4 mt-6">
             @csrf

@@ -30,31 +30,45 @@
 
     <div class="space-y-3 mt-6">
         @forelse ($ticket->respostas as $resposta)
-            <div class="flex 
+            <div class="flex items-start gap-3
                 @if ($resposta->user_id === auth()->id())
                     justify-end
                 @else
                     justify-start
                 @endif
             ">
+                {{-- Avatar com iniciais --}}
+                @if ($resposta->user_id !== auth()->id())
+                    <div class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full text-sm font-bold dark:bg-blue-400">
+                        {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
+                    </div>
+                @endif
+    
                 <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow
                     @if ($resposta->user_id === auth()->id())
-                        bg-green-500 text-white rounded-br-none
+                        bg-green-500 text-white rounded-br-none dark:bg-green-600
                     @else
-                        bg-gray-200 text-gray-900 rounded-bl-none
+                        bg-gray-200 text-gray-900 rounded-bl-none dark:bg-gray-700 dark:text-gray-100
                     @endif
                 ">
                     <p class="text-sm font-semibold mb-1">
                         {{ $resposta->user->name }}
-                        <span class="text-xs text-gray-100/80 ml-2">
+                        <span class="text-xs text-gray-100/80 ml-2 dark:text-gray-300">
                             {{ $resposta->created_at->format('d/m/Y H:i') }}
                         </span>
                     </p>
                     <p class="text-sm leading-snug">{{ $resposta->content }}</p>
                 </div>
+    
+                {{-- Avatar do utilizador logado (à direita) --}}
+                @if ($resposta->user_id === auth()->id())
+                    <div class="flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-full text-sm font-bold dark:bg-green-400">
+                        {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
+                    </div>
+                @endif
             </div>
         @empty
-            <p class="text-gray-600">Nenhuma resposta ainda.</p>
+            <p class="text-gray-600 dark:text-gray-300">Ainda não há respostas para este ticket.</p>
         @endforelse
     </div>
     

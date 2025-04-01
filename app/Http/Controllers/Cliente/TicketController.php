@@ -61,13 +61,19 @@ class TicketController extends Controller
 
     public function show($id)
     {
-        $ticket = Ticket::with(['respostas.user'])
-            ->where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
+        $ticket = Ticket::with([
+            'respostas' => function ($query) {
+                $query->orderBy('created_at', 'asc');
+            },
+            'respostas.user'
+        ])
+        ->where('id', $id)
+        ->where('user_id', auth()->id())
+        ->firstOrFail();
 
         return view('cliente.tickets.show', compact('ticket'));
     }
+
 
     public function responder(Request $request, $id)
     {
