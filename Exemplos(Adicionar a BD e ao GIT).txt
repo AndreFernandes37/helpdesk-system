@@ -1,0 +1,31 @@
+
+\App\Models\User::create([
+    'name' => 'Administrador',
+    'email' => 'andre.fernandes.it@gmail.com',
+    'password' => bcrypt('26091997'),
+    'role' => 'admin'
+]);
+
+\App\Models\User::create([
+    'name' => 'Andre Fernandes',
+    'email' => 'andre8c2@gmail.com',
+    'password' => bcrypt('26091997'),
+    'role' => 'client'
+]);
+
+use App\Models\Categoria;
+
+Categoria::create(['name' => 'Suporte Técnico']);
+Categoria::create(['name' => 'Financeiro']);
+Categoria::create(['name' => 'Comercial']);
+Categoria::create(['name' => 'Outros']);
+
+
+
+###########- Add to Git -################
+
+git status
+git add .
+git commit -m "(Comentario que pretender)Ordenação das respostas por data e melhorias visuais no cliente"
+git push origin main
+#Verificar GitHub
