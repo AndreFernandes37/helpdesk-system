@@ -5,6 +5,18 @@
         </h2>
     </x-slot>
 
+    @if (session('success'))
+        <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded shadow mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="bg-red-100 border border-red-300 text-red-800 px-4 py-2 rounded shadow mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="py-4 px-6 space-y-4">
         <a href="{{ route('cliente.dashboard') }}" class="text-blue-600 underline">← Voltar</a>
 
@@ -28,7 +40,7 @@
 
     <h4 class="text-md font-semibold mb-2">Respostas</h4>
 
-    <div class="space-y-3 mt-6">
+    <div id="respostas-container" class="h-[400px] overflow-y-auto space-y-3 mt-6 pr-2">
         @forelse ($ticket->respostas as $resposta)
             <div class="flex items-start gap-3
                 @if ($resposta->user_id === auth()->id())
@@ -37,13 +49,14 @@
                     justify-start
                 @endif
             ">
-                {{-- Avatar com iniciais --}}
+                {{-- Avatar --}}
                 @if ($resposta->user_id !== auth()->id())
-                    <div class="flex items-center justify-center w-10 h-10 bg-blue-600 text-white rounded-full text-sm font-bold dark:bg-blue-400">
+                    <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-blue-400">
                         {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
                     </div>
                 @endif
     
+                {{-- Balão de mensagem --}}
                 <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow
                     @if ($resposta->user_id === auth()->id())
                         bg-green-500 text-white rounded-br-none dark:bg-green-600
@@ -60,16 +73,17 @@
                     <p class="text-sm leading-snug">{{ $resposta->content }}</p>
                 </div>
     
-                {{-- Avatar do utilizador logado (à direita) --}}
                 @if ($resposta->user_id === auth()->id())
-                    <div class="flex items-center justify-center w-10 h-10 bg-green-600 text-white rounded-full text-sm font-bold dark:bg-green-400">
+                    <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-green-400">
                         {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
                     </div>
                 @endif
             </div>
         @empty
-            <p class="text-gray-600 dark:text-gray-300">Ainda não há respostas para este ticket.</p>
+            <p class="text-gray-600 dark:text-gray-300">Nenhuma resposta ainda.</p>
         @endforelse
+    
+        <div id="scroll-bottom"></div>
     </div>
     
 
@@ -80,9 +94,106 @@
     <form action="{{ route('cliente.ticket.reply', $ticket->id) }}" method="POST" class="space-y-4">
         @csrf
         <textarea name="content" rows="4" class="w-full border rounded px-3 py-2" required placeholder="Escreva sua resposta..."></textarea>
+        @error('content')
+            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+        @enderror
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
             Enviar
         </button>
     </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const respostasContainer = document.querySelector('#respostas-container');
+            const ticketId = '{{ $ticket->id }}';
 
+            function scrollToBottom() {
+                const scrollBottom = document.getElementById('scroll-bottom');
+                if (scrollBottom) {
+                    scrollBottom.scrollIntoView({ behavior: 'auto' });
+                }
+            }
+
+            async function fetchRespostas() {
+                try {
+                    const response = await fetch(`{{ url('/cliente/ticket/${ticketId}/respostas') }}`);
+                    if (response.ok) {
+                        const respostas = await response.json();
+                        renderRespostas(respostas);
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar respostas:', error);
+                }
+            }
+
+            function renderRespostas(respostas) {
+                respostasContainer.innerHTML = '';
+                
+                // Adiciona as respostas
+                respostas.forEach(resposta => {
+                    const userId = resposta.user_id;
+                    const userName = resposta.user ? resposta.user.name : 'Anônimo';
+
+                    const respostaDiv = document.createElement('div');
+                    respostaDiv.classList.add('flex', 'items-start', 'gap-3');
+
+                    if (userId === "{{ auth()->id() }}") {
+                        respostaDiv.classList.add('justify-end');
+                    } else {
+                        respostaDiv.classList.add('justify-start');
+                    }
+
+                    const avatarDiv = document.createElement('div');
+                    avatarDiv.classList.add('flex', 'items-center', 'justify-center', 'w-10', 'h-10', 'rounded-full', 'text-sm', 'font-bold');
+                    avatarDiv.innerText = userName.substring(0, 2).toUpperCase();
+                    avatarDiv.style.backgroundColor = userId === "{{ auth()->id() }}" ? '#22c55e' : '#3b82f6';
+
+                    const bubbleDiv = document.createElement('div');
+                    bubbleDiv.classList.add('max-w-[70%]', 'px-4', 'py-2', 'rounded-2xl', 'shadow');
+                    bubbleDiv.innerHTML = `
+                        <p class="text-sm font-semibold mb-1">
+                            ${userName} 
+                            <span class="text-xs text-gray-500 ml-2">
+                                ${resposta.created_at}
+                            </span>
+                        </p>
+                        <p class="text-sm leading-snug">${resposta.content}</p>
+                    `;
+
+                    if (userId === "{{ auth()->id() }}") {
+                        bubbleDiv.classList.add('bg-green-500', 'text-white', 'rounded-br-none');
+                    } else {
+                        bubbleDiv.classList.add('bg-gray-200', 'text-gray-900', 'rounded-bl-none');
+                    }
+
+                    if (userId !== "{{ auth()->id() }}") {
+                        respostaDiv.appendChild(avatarDiv);
+                        respostaDiv.appendChild(bubbleDiv);
+                    } else {
+                        respostaDiv.appendChild(bubbleDiv);
+                        respostaDiv.appendChild(avatarDiv);
+                    }
+
+                    respostasContainer.appendChild(respostaDiv);
+                });
+
+                // Recria o "scroll-bottom"
+                const scrollBottomDiv = document.createElement('div');
+                scrollBottomDiv.id = 'scroll-bottom';
+                respostasContainer.appendChild(scrollBottomDiv);
+                // Scroll para o fim após renderizar
+                scrollToBottom();
+            }
+
+            // Faz o scroll inicial logo ao carregar
+            scrollToBottom();
+
+            // Faz a primeira busca
+            fetchRespostas();
+
+            // Atualiza automaticamente a cada 15 segundos
+            setInterval(fetchRespostas, 15000);
+        });
+
+    </script>
+    
 </x-app-layout>

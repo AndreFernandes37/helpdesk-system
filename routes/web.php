@@ -28,11 +28,12 @@ Route::middleware(['auth'])->prefix('cliente')->group(function () {
     Route::post('/ticket', [ClienteTicketController::class, 'store'])
     ->middleware(['throttle:3,1']) // permite 3 tickets por minuto
     ->name('cliente.ticket.store');
-
     Route::get('/ticket/{id}', [ClienteTicketController::class, 'show'])->name('cliente.ticket.show');
     Route::post('/ticket/{id}/responder', [ClienteTicketController::class, 'responder'])
     ->middleware(['throttle:5,1']) // 5 requisições por minuto
     ->name('cliente.ticket.reply');
+    Route::get('/ticket/{id}/respostas', [ClienteTicketController::class, 'respostasJson'])->name('cliente.ticket.respostas');
+
 
 
 });
@@ -44,9 +45,7 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(func
     Route::get('/tickets/{id}', [AdminTicketController::class, 'show'])->name('admin.tickets.show');
     Route::post('/tickets/{id}/responder', [AdminTicketController::class, 'responder'])->name('admin.tickets.reply');
     Route::post('/tickets/{id}/status', [AdminTicketController::class, 'atualizarStatus'])->name('admin.tickets.status');
-});
-
-Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(function () {
+    Route::get('/ticket/{id}/respostas', [AdminTicketController::class, 'respostasJson'])->name('admin.ticket.respostas');
     Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');

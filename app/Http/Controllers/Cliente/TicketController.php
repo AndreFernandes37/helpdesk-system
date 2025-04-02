@@ -101,6 +101,13 @@ class TicketController extends Controller
         return redirect()->route('cliente.ticket.show', $ticket->id)->with('success', 'Resposta enviada!');
     }
 
+    public function respostasJson($id)
+    {
+        $ticket = Ticket::with(['respostas.user'])->findOrFail($id);
+        return response()->json($ticket->respostas);
+    }
+
+
 
 
 

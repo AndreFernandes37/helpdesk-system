@@ -29,8 +29,9 @@ class Ticket extends Model
 
     public function respostas()
     {
-        return $this->hasMany(Resposta::class);
+        return $this->hasMany(Resposta::class)->orderBy('created_at', 'asc');
     }
+
 
     public function user()
     {

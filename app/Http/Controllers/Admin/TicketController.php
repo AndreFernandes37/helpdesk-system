@@ -50,7 +50,7 @@ class TicketController extends Controller
     public function responder(Request $request, $id)
     {
         $request->validate([
-            'content' => 'required|string|max:2000',
+            'content' => 'required|string|max:5000',
         ]);
 
         $ticket = Ticket::findOrFail($id);
@@ -62,6 +62,7 @@ class TicketController extends Controller
         ]);
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Resposta enviada!');
+
     }
 
     public function atualizarStatus(Request $request, $id)
@@ -76,4 +77,12 @@ class TicketController extends Controller
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Status atualizado!');
     }
+
+    public function respostasJson($id)
+    {
+        $ticket = Ticket::with(['respostas.user'])->findOrFail($id);
+        return response()->json($ticket->respostas);
+    }
+
+
 }
