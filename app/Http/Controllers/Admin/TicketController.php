@@ -27,9 +27,15 @@ class TicketController extends Controller
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+        
         $tickets = $query->latest()->get();
-
-        return view('admin.tickets.index', compact('tickets'));
+        $categorias = \App\Models\Categoria::all();
+        
+        return view('admin.tickets.index', compact('tickets', 'categorias'));
+        
     }
 
     public function show($id)

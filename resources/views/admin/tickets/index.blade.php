@@ -6,26 +6,40 @@
     </x-slot>
 
     <div class="px-6 py-4 space-y-4">
-        <form method="GET" class="flex flex-wrap gap-4">
-            <select name="status" class="border rounded px-3 py-2">
-                <option value="">Status</option>
-                <option value="open" {{ request('status') === 'open' ? 'selected' : '' }}>Aberto</option>
-                <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>Em andamento</option>
-                <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Fechado</option>
-            </select>
+        <form method="GET" class="flex flex-wrap items-center gap-3 mb-6">
 
-            <select name="priority" class="border rounded px-3 py-2">
-                <option value="">Prioridade</option>
-                <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>Baixa</option>
-                <option value="medium" {{ request('priority') === 'medium' ? 'selected' : '' }}>Média</option>
-                <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>Alta</option>
+            <select name="status" class="border px-3 pr-10 py-2 rounded-md dark:bg-gray-800 dark:text-white">
+                <option value="">Todos os status</option>
+                <option value="open" @selected(request('status') === 'open')>Aberto</option>
+                <option value="pending" @selected(request('status') === 'pending')>Pendente</option>
+                <option value="closed" @selected(request('status') === 'closed')>Fechado</option>
             </select>
-
+        
+            <select name="priority" class="border px-3 pr-10 py-2 rounded-md dark:bg-gray-800 dark:text-white">
+                <option value="">Todas as prioridades</option>
+                <option value="low" @selected(request('priority') === 'low')>Baixa</option>
+                <option value="medium" @selected(request('priority') === 'medium')>Média</option>
+                <option value="high" @selected(request('priority') === 'high')>Alta</option>
+            </select>
+        
+            <select name="categoria_id" class="border px-3 pr-10 py-2 rounded-md dark:bg-gray-800 dark:text-white">
+                <option value="">Todas as categorias</option>
+                @foreach($categorias as $categoria)
+                    <option value="{{ $categoria->id }}" @selected(request('categoria_id') == $categoria->id)>
+                        {{ $categoria->name }}
+                    </option>
+                @endforeach
+            </select>
+        
             <input type="text" name="search" value="{{ request('search') }}"
-                placeholder="Buscar por título..." class="border rounded px-3 py-2">
-
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Filtrar</button>
+                   class="border px-3 py-2 rounded-md dark:bg-gray-800 dark:text-white"
+                   placeholder="Procurar ticket...">
+        
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Filtrar
+            </button>
         </form>
+        
 
         <table class="w-full text-sm border rounded">
             <thead>
