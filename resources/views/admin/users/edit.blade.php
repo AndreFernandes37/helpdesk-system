@@ -37,6 +37,12 @@
                     <option value="client" @selected($user->role === 'client')>Cliente</option>
                 </select>
             </div>
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-white">Nova Password (opcional)</label>
+                <input type="password" name="password" id="password"
+                       class="mt-1 block w-full px-3 py-2 rounded-md dark:bg-gray-800 dark:text-white border-gray-300 shadow-sm focus:ring focus:ring-blue-200">
+            </div>
+            
 
             <div class="flex items-center justify-between">
                 <a href="{{ route('admin.users.index') }}" class="text-sm text-gray-600 dark:text-gray-300 hover:underline">

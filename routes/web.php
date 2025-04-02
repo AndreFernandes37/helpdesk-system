@@ -45,6 +45,8 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(func
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
     Route::patch('/users/{id}/toggle-active', [UserController::class, 'toggleActive'])->name('admin.users.toggle');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');
 });
 
 

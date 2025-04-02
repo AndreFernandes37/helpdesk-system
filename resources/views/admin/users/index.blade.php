@@ -46,13 +46,22 @@
                                 </span>
                             </td>                            
                             <td class="py-2 px-4">{{ $user->created_at->format('d/m/Y') }}</td>
-                            <td class="flex items-center gap-3">
+                            <td class="flex flex-wrap gap-3">
+                                {{-- Ver Perfil --}}
+                                <a href="{{ route('admin.users.show', $user->id) }}"
+                                    class="flex items-center gap-1 text-gray-600 hover:underline text-sm">
+                                     <i data-lucide="eye" class="w-4 h-4"></i>
+                                     Ver
+                                 </a>
+                                 
+                                {{-- Editar --}}
                                 <a href="{{ route('admin.users.edit', $user->id) }}"
                                    class="flex items-center gap-1 text-blue-600 hover:underline text-sm">
                                     <i data-lucide="edit" class="w-4 h-4"></i>
                                     Editar
                                 </a>
                             
+                                {{-- Ativar/Desativar --}}
                                 <form method="POST" action="{{ route('admin.users.toggle', $user->id) }}">
                                     @csrf
                                     @method('PATCH')
@@ -63,7 +72,19 @@
                                         {{ $user->active ? 'Desativar' : 'Ativar' }}
                                     </button>
                                 </form>
+                            
+                                {{-- Eliminar --}}
+                                <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
+                                      onsubmit="return confirm('Tem a certeza que deseja eliminar este utilizador?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="flex items-center gap-1 text-red-600 hover:underline text-sm">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        Eliminar
+                                    </button>
+                                </form>
                             </td>
+                            
                             
                             
                         </tr>
