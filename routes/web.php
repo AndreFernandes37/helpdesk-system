@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Cliente\TicketController;
+use App\Http\Controllers\Cliente\TicketController as ClienteTicketController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\AdminMiddleware;
@@ -23,11 +23,17 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->prefix('cliente')->group(function () {
-    Route::get('/dashboard', [TicketController::class, 'index'])->name('cliente.dashboard');
-    Route::get('/ticket/novo', [TicketController::class, 'create'])->name('cliente.ticket.create');
-    Route::post('/ticket', [TicketController::class, 'store'])->name('cliente.ticket.store');
-    Route::get('/ticket/{id}', [TicketController::class, 'show'])->name('cliente.ticket.show');
-    Route::post('/ticket/{id}/responder', [TicketController::class, 'responder'])->name('cliente.ticket.reply');
+    Route::get('/dashboard', [ClienteTicketController::class, 'index'])->name('cliente.dashboard');
+    Route::get('/ticket/novo', [ClienteTicketController::class, 'create'])->name('cliente.ticket.create');
+    Route::post('/ticket', [ClienteTicketController::class, 'store'])
+    ->middleware(['throttle:3,1']) // permite 3 tickets por minuto
+    ->name('cliente.ticket.store');
+
+    Route::get('/ticket/{id}', [ClienteTicketController::class, 'show'])->name('cliente.ticket.show');
+    Route::post('/ticket/{id}/responder', [ClienteTicketController::class, 'responder'])
+    ->middleware(['throttle:5,1']) // 5 requisições por minuto
+    ->name('cliente.ticket.reply');
+
 
 });
 
