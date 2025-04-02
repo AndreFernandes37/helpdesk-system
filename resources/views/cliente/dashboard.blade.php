@@ -12,39 +12,48 @@
 
         <h3 class="text-lg font-semibold">Meus Tickets</h3>
 
-        <form method="GET" class="mb-4 flex flex-wrap gap-3 items-end">
-            <div>
-                <label for="status" class="block text-sm font-medium">Status</label>
-                <select name="status" id="status" class="border rounded px-3 py-2">
-                    <option value="">Todos</option>
-                    <option value="open" {{ request('status') === 'open' ? 'selected' : '' }}>Aberto</option>
-                    <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>Em andamento</option>
-                    <option value="closed" {{ request('status') === 'closed' ? 'selected' : '' }}>Fechado</option>
-                </select>
-            </div>
+        <form method="GET" class="flex flex-wrap items-center gap-3 mb-6">
+            {{-- Filtro por status --}}
+            <select name="status" class="border px-3 py-2 pr-10 rounded-md dark:bg-gray-800 dark:text-white">
+                <option value="">Todos os status</option>
+                <option value="open" @selected(request('status') === 'open')>Aberto</option>
+                <option value="pending" @selected(request('status') === 'pending')>Pendente</option>
+                <option value="closed" @selected(request('status') === 'closed')>Fechado</option>
+            </select>
         
-            <div>
-                <label for="priority" class="block text-sm font-medium">Prioridade</label>
-                <select name="priority" id="priority" class="border rounded px-3 py-2">
-                    <option value="">Todas</option>
-                    <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>Baixa</option>
-                    <option value="medium" {{ request('priority') === 'medium' ? 'selected' : '' }}>Média</option>
-                    <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>Alta</option>
-                </select>
-            </div>
+            {{-- Filtro por prioridade --}}
+            <select name="priority" class="border px-3 py-2 pr-10 rounded-md dark:bg-gray-800 dark:text-white">
+                <option value="">Todas as prioridades</option>
+                <option value="low" @selected(request('priority') === 'low')>Baixa</option>
+                <option value="medium" @selected(request('priority') === 'medium')>Média</option>
+                <option value="high" @selected(request('priority') === 'high')>Alta</option>
+            </select>
         
+            {{-- Filtro por categoria --}}
+            <select name="categoria_id" class="border px-3 py-2 pr-10 rounded-md dark:bg-gray-800 dark:text-white">
+                <option value="">Todas as categorias</option>
+                @foreach($categorias as $categoria)
+                    <option value="{{ $categoria->id }}" @selected(request('categoria_id') == $categoria->id)>
+                        {{ $categoria->name }}
+                    </option>
+                @endforeach
+            </select>        
+        
+            {{-- Pesquisa por título --}}
             <div>
-                <label for="search" class="block text-sm font-medium">Título</label>
                 <input type="text" name="search" id="search" value="{{ request('search') }}"
-                       class="border rounded px-3 py-2" placeholder="Buscar título...">
+                       class="border px-3 py-2 rounded-md dark:bg-gray-800 dark:text-white"
+                       placeholder="Procurar ticket...">
             </div>
         
+            {{-- Botão de filtro --}}
             <div>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-6">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                     Filtrar
                 </button>
             </div>
         </form>
+        
 
         @if(request()->hasAny(['status', 'priority', 'search']))
             <p class="text-sm text-gray-600">

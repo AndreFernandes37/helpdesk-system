@@ -23,13 +23,20 @@ class TicketController extends Controller
             $query->where('priority', $request->priority);
         }
 
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }   
+
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
         $tickets = $query->latest()->get();
 
-        return view('cliente.dashboard', compact('tickets'));
+        $categorias = Categoria::all();
+
+        return view('cliente.dashboard', compact('tickets', 'categorias'));
+
     }
 
     public function create()
