@@ -26,6 +26,14 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        if (!auth()->user()->active) {
+            auth()->logout();
+        
+            return back()->withErrors([
+                'email' => 'A tua conta está desativada.',
+            ]);
+        }
+        
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));

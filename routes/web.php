@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cliente\TicketController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 
@@ -37,6 +38,13 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(func
     Route::get('/tickets/{id}', [AdminTicketController::class, 'show'])->name('admin.tickets.show');
     Route::post('/tickets/{id}/responder', [AdminTicketController::class, 'responder'])->name('admin.tickets.reply');
     Route::post('/tickets/{id}/status', [AdminTicketController::class, 'atualizarStatus'])->name('admin.tickets.status');
+});
+
+Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');
+    Route::patch('/users/{id}/toggle-active', [UserController::class, 'toggleActive'])->name('admin.users.toggle');
 });
 
 

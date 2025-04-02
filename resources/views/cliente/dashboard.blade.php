@@ -33,7 +33,7 @@
             <select name="categoria_id" class="border px-3 py-2 pr-10 rounded-md dark:bg-gray-800 dark:text-white">
                 <option value="">Todas as categorias</option>
                 @foreach($categorias as $categoria)
-                    <option value="{{ $categoria->id }" @selected(request('categoria_id') == $categoria->id)>
+                    <option value="{{ $categoria->id }}" @selected(request('categoria_id') == $categoria->id)>
                         {{ $categoria->name }}
                     </option>
                 @endforeach
