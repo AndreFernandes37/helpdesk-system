@@ -51,15 +51,29 @@ class TicketController extends Controller
     {
         $request->validate([
             'content' => 'required|string|max:5000',
+            'attachment' => 'nullable|file|max:5120', // Validação do anexo, máximo de 5MB
         ]);
+
+        $attachmentPath = null;
 
         $ticket = Ticket::findOrFail($id);
 
-        Resposta::create([
+        $resposta = Resposta::create([
             'ticket_id' => $ticket->id,
             'user_id' => Auth::id(),
             'content' => $request->content,
+            'attachment_path' => $attachmentPath,
         ]);
+
+        // Verifica se um anexo foi enviado
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('attachments', 'public');
+            
+            // Adiciona o caminho do anexo à resposta (assumindo que a tabela respostas tem uma coluna 'attachment')
+            $resposta->attachment = $attachmentPath;
+            $resposta->save();
+        }
+        
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Resposta enviada!');
 

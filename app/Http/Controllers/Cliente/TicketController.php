@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Cliente;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 use App\Models\Categoria;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
@@ -90,26 +93,37 @@ class TicketController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:2000',
+            'attachment' => 'nullable|file|max:5120', // Validação do anexo, máximo de 5MB
         ]);
 
-        Resposta::create([
+        $attachmentPath = null;
+        
+        // Cria a resposta
+        $resposta = Resposta::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
             'content' => $request->content,
+            'attachment_path' => $attachmentPath,
         ]);
+
+        // Verifica se um anexo foi enviado
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('attachments', 'public');
+            
+            // Adiciona o caminho do anexo à resposta (assumindo que a tabela respostas tem uma coluna 'attachment')
+            $resposta->attachment = $attachmentPath;
+            $resposta->save();
+        }
 
         return redirect()->route('cliente.ticket.show', $ticket->id)->with('success', 'Resposta enviada!');
     }
+
 
     public function respostasJson($id)
     {
         $ticket = Ticket::with(['respostas.user'])->findOrFail($id);
         return response()->json($ticket->respostas);
     }
-
-
-
-
 
 }
 

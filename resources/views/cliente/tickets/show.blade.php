@@ -63,46 +63,55 @@
 
     <div id="respostas-container" class="h-[400px] overflow-y-auto space-y-3 mt-6 pr-2">
         @forelse ($ticket->respostas as $resposta)
-            <div class="flex items-start gap-3
+        <div class="flex items-start gap-3
+            @if ($resposta->user_id === auth()->id())
+                justify-end
+            @else
+                justify-start
+            @endif
+        ">
+            {{-- Avatar --}}
+            @if ($resposta->user_id !== auth()->id())
+                <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-blue-400">
+                    {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
+                </div>
+            @endif
+    
+            {{-- Balão de mensagem --}}
+            <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow
                 @if ($resposta->user_id === auth()->id())
-                    justify-end
+                    bg-green-500 text-white rounded-br-none dark:bg-green-600
                 @else
-                    justify-start
+                    bg-gray-200 text-gray-900 rounded-bl-none dark:bg-gray-700 dark:text-gray-100
                 @endif
             ">
-                {{-- Avatar --}}
-                @if ($resposta->user_id !== auth()->id())
-                    <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-blue-400">
-                        {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
-                    </div>
-                @endif
+                <p class="text-sm font-semibold mb-1">
+                    {{ $resposta->user->name }}
+                    <span class="text-xs text-gray-100/80 ml-2 dark:text-gray-300">
+                        {{ $resposta->created_at->format('d/m/Y H:i') }}
+                    </span>
+                </p>
+                <p class="text-sm leading-snug">{{ $resposta->content }}</p>
     
-                {{-- Balão de mensagem --}}
-                <div class="max-w-[70%] px-4 py-2 rounded-2xl shadow
-                    @if ($resposta->user_id === auth()->id())
-                        bg-green-500 text-white rounded-br-none dark:bg-green-600
-                    @else
-                        bg-gray-200 text-gray-900 rounded-bl-none dark:bg-gray-700 dark:text-gray-100
-                    @endif
-                ">
-                    <p class="text-sm font-semibold mb-1">
-                        {{ $resposta->user->name }}
-                        <span class="text-xs text-gray-100/80 ml-2 dark:text-gray-300">
-                            {{ $resposta->created_at->format('d/m/Y H:i') }}
-                        </span>
-                    </p>
-                    <p class="text-sm leading-snug">{{ $resposta->content }}</p>
-                </div>
-    
-                @if ($resposta->user_id === auth()->id())
-                    <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-green-400">
-                        {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
-                    </div>
+                @if ($resposta->attachment)
+                    <a href="{{ asset('/storage/' . $resposta->attachment) }}" 
+                       target="_blank" 
+                       class="text-blue-600 underline mt-2 block">
+                       Ver anexo
+                    </a>
                 @endif
             </div>
-        @empty
-            <p class="text-gray-600 dark:text-gray-300">Nenhuma resposta ainda.</p>
-        @endforelse
+    
+            @if ($resposta->user_id === auth()->id())
+                <div class="w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold dark:bg-green-400">
+                    {{ strtoupper(substr($resposta->user->name, 0, 2)) }}
+                </div>
+            @endif
+        </div>
+    @empty
+        <p class="text-gray-600 dark:text-gray-300">Nenhuma resposta ainda.</p>
+    @endforelse
+    
     
         <div id="scroll-bottom"></div>
     </div>
@@ -112,16 +121,24 @@
 
     <h4 class="text-md font-semibold mb-2">Responder</h4>
 
-    <form action="{{ route('cliente.ticket.reply', $ticket->id) }}" method="POST" class="space-y-4">
+    <form action="{{ route('cliente.ticket.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
         @csrf
         <textarea name="content" rows="4" class="w-full border rounded px-3 py-2" required placeholder="Escreva sua resposta..."></textarea>
+        <input type="file" name="attachment" accept="image/*,.pdf,.doc,.docx" class="mt-2">
         @error('content')
             <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
         @enderror
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Enviar
-        </button>
+        @error('attachment')
+            <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+        @enderror
+        <div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4">
+                Enviar
+            </button>
+        </div>
     </form>
+    
+    
     <script>
         let lastMessageCount = document.querySelectorAll('#respostas-container .resposta').length;
         document.addEventListener('DOMContentLoaded', function () {
@@ -181,6 +198,16 @@
                         <p class="text-sm leading-snug">${resposta.content}</p>
                     `;
 
+                    // Se a resposta tiver um anexo, adicione um link para ele
+                    if (resposta.attachment) {
+                        const attachmentLink = document.createElement('a');
+                        attachmentLink.href = `/storage/${resposta.attachment}`;
+                        attachmentLink.textContent = 'Ver Anexo';
+                        attachmentLink.target = '_blank';
+                        attachmentLink.classList.add('text-blue-500', 'underline', 'mt-2', 'block');
+                        bubbleDiv.appendChild(attachmentLink);
+                    }
+
                     if (userId === "{{ auth()->id() }}") {
                         bubbleDiv.classList.add('bg-green-500', 'text-white', 'rounded-br-none');
                     } else {
@@ -204,7 +231,7 @@
                 respostasContainer.appendChild(scrollBottomDiv);
                 
                 const currentMessageCount = respostas.length;
-            
+
                 // Scroll para o fim após renderizar
                 if (currentMessageCount > lastMessageCount) {
                     scrollToBottom();
@@ -213,6 +240,7 @@
                 // Atualiza o lastMessageCount para refletir a contagem atual de mensagens
                 lastMessageCount = currentMessageCount;
             }
+
 
             // Faz o scroll inicial logo ao carregar
             scrollToBottom();

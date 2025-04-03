@@ -120,11 +120,14 @@
         
         
 
-        <form action="{{ route('admin.tickets.reply', $ticket->id) }}" method="POST" class="space-y-4 mt-6">
+        <form action="{{ route('admin.tickets.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4 mt-6">
             @csrf
             <label class="block font-semibold">Responder:</label>
             <textarea name="content" rows="4" class="w-full border rounded px-3 py-2" required placeholder="Escreva sua resposta..."></textarea>
             @error('content')
+                <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+            @enderror
+            @error('attachment')
                 <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
             @enderror
             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -191,6 +194,16 @@
                         </p>
                         <p class="text-sm leading-snug">${resposta.content}</p>
                     `;
+
+                    if (resposta.attachment) {
+                        const attachmentLink = document.createElement('a');
+                        attachmentLink.href = `/storage/${resposta.attachment}`;
+                        attachmentLink.textContent = 'Ver Anexo';
+                        attachmentLink.target = '_blank';
+                        attachmentLink.classList.add('text-blue-500', 'underline', 'mt-2', 'block');
+                        bubbleDiv.appendChild(attachmentLink);
+                    }
+
 
                     if (userId === "{{ auth()->id() }}") {
                         bubbleDiv.classList.add('bg-green-500', 'text-white', 'rounded-br-none');
