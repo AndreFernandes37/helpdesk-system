@@ -25,8 +25,31 @@
         <div class="border rounded p-4 bg-white shadow">
             <h3 class="text-lg font-bold">{{ $ticket->title }}</h3>
             <p><strong>Cliente:</strong> {{ $ticket->user->name }}</p>
-            <p><strong>Status:</strong> {{ ucfirst($ticket->status) }}</p>
-            <p><strong>Prioridade:</strong> {{ ucfirst($ticket->priority) }}</p>
+            <p><strong>Status:</strong>
+                <span class="px-2 py-1 rounded text-white text-xs font-semibold 
+                    @switch($ticket->status)
+                        @case('open') bg-yellow-500 @break
+                        @case('in_progress') bg-blue-500 @break
+                        @case('closed') bg-green-600 @break
+                        @default bg-gray-400
+                    @endswitch
+                ">
+                    {{ ucfirst($ticket->status) }}
+                </span>
+             </p>             
+             <p><strong>Prioridade:</strong>
+                <span class="px-2 py-1 rounded text-white text-xs font-semibold 
+                    @switch($ticket->priority)
+                        @case('high') bg-red-600 @break
+                        @case('medium') bg-yellow-600 @break
+                        @case('low') bg-green-600 @break
+                        @default bg-gray-400
+                    @endswitch
+                ">
+                    {{ ucfirst($ticket->priority) }}
+                </span>
+             </p>
+             
             <p><strong>Descrição:</strong><br>{{ $ticket->description }}</p>
             <p class="text-sm text-gray-500">Criado em: {{ $ticket->created_at->format('d/m/Y H:i') }}</p>
 
@@ -111,6 +134,7 @@
 
     </div>
     <script>
+        let lastMessageCount = document.querySelectorAll('#respostas-container .resposta').length;
         document.addEventListener('DOMContentLoaded', function () {
             const respostasContainer = document.querySelector('#respostas-container');
             const ticketId = '{{ $ticket->id }}';
@@ -189,8 +213,17 @@
                 const scrollBottomDiv = document.createElement('div');
                 scrollBottomDiv.id = 'scroll-bottom';
                 respostasContainer.appendChild(scrollBottomDiv);
+
+                const currentMessageCount = respostas.length;
+            
                 // Scroll para o fim após renderizar
-                scrollToBottom();
+                if (currentMessageCount > lastMessageCount) {
+                    scrollToBottom();
+                }
+
+                // Atualiza o lastMessageCount para refletir a contagem atual de mensagens
+                lastMessageCount = currentMessageCount;
+
             }
 
             // Faz o scroll inicial logo ao carregar
