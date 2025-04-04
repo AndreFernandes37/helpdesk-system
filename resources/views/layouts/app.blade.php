@@ -16,6 +16,18 @@
         <script src="https://unpkg.com/lucide@latest"></script>
     </head>
     <body class="font-sans antialiased">
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded shadow mb-4">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-300 text-red-800 px-4 py-2 rounded shadow mb-4">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900"
              x-data="{ dark: localStorage.getItem('theme') === 'dark' }"
              x-init="$watch('dark', val => {

@@ -31,8 +31,15 @@ class TicketController extends Controller
             $query->where('categoria_id', $request->categoria_id);
         }
         
-        $tickets = $query->latest()->get();
+        //$tickets = $query->latest()->get();
+        $tickets = $query->latest()->paginate(10);
         $categorias = \App\Models\Categoria::all();
+
+        // Contar as respostas não lidas
+        foreach ($tickets as $ticket) {
+            $ticket->unread_responses_count = $ticket->respostas()->where('is_read', false)->count();
+        }
+        
         
         return view('admin.tickets.index', compact('tickets', 'categorias'));
         
@@ -40,9 +47,15 @@ class TicketController extends Controller
 
     public function show($id)
     {
+        $ticket = Ticket::findOrFail($id);
+        
+        // Marcar o ticket como lido
+        $ticket->read = true;
+        $ticket->save();
+
         $ticket = Ticket::with(['respostas' => function ($query) {
             $query->orderBy('created_at', 'asc');
-        }, 'respostas.user'])->findOrFail($id);        
+        }, 'respostas.user'])->findOrFail($id);
 
         return view('admin.tickets.show', compact('ticket'));
     }
@@ -73,6 +86,9 @@ class TicketController extends Controller
             $resposta->attachment = $attachmentPath;
             $resposta->save();
         }
+
+        // Notificação quando a resposta for adicionada
+        session()->flash('success', 'Resposta enviada com sucesso!');
         
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Resposta enviada!');
