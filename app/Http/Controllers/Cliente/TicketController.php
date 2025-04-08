@@ -81,6 +81,14 @@ class TicketController extends Controller
         ->where('user_id', auth()->id())
         ->firstOrFail();
 
+        // Marcar todas as respostas como lidas ao exibir o ticket
+        foreach ($ticket->respostas as $resposta) {
+            // Verifica se a resposta não foi lida e se não é do usuário atual
+            if (!$resposta->is_read && $resposta->user_id !== auth()->id()) {
+                $resposta->update(['is_read' => true]);  // Atualiza o status para "lido"
+            }
+        }
+
         return view('cliente.tickets.show', compact('ticket'));
     }
 
@@ -104,6 +112,7 @@ class TicketController extends Controller
             'user_id' => auth()->id(),
             'content' => $request->content,
             'attachment_path' => $attachmentPath,
+            'is_read' => 0,
         ]);
 
         // Verifica se um anexo foi enviado
@@ -124,6 +133,20 @@ class TicketController extends Controller
         $ticket = Ticket::with(['respostas.user'])->findOrFail($id);
         return response()->json($ticket->respostas);
     }
+
+    public function markRespostaAsRead(Request $request, $id)
+    {
+        $resposta = Resposta::findOrFail($id);
+
+        // Certifique-se de que a resposta não seja do próprio usuário
+        if ($resposta->user_id !== auth()->id()) {
+            $resposta->update(['is_read' => true]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+
 
 }
 

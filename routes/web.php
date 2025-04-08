@@ -33,6 +33,7 @@ Route::middleware(['auth'])->prefix('cliente')->group(function () {
     ->middleware(['throttle:5,1']) // 5 requisições por minuto
     ->name('cliente.ticket.reply');
     Route::get('/ticket/{id}/respostas', [ClienteTicketController::class, 'respostasJson'])->name('cliente.ticket.respostas');
+    Route::post('/ticket/resposta/{id}/mark-read', [ClienteTicketController::class, 'markRespostaAsRead']);
 
 
 
@@ -46,6 +47,7 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(func
     Route::post('/tickets/{id}/responder', [AdminTicketController::class, 'responder'])->name('admin.tickets.reply');
     Route::post('/tickets/{id}/status', [AdminTicketController::class, 'atualizarStatus'])->name('admin.tickets.status');
     Route::get('/ticket/{id}/respostas', [AdminTicketController::class, 'respostasJson'])->name('admin.ticket.respostas');
+    Route::post('/tickets/resposta/{id}/mark-read', [AdminTicketController::class, 'markRespostaAsRead']);
     Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
     Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{id}', [UserController::class, 'update'])->name('admin.users.update');

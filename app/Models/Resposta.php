@@ -11,6 +11,7 @@ class Resposta extends Model
         'ticket_id',
         'user_id',
         'content',
+        'is_read',
     ];
 
     protected static function boot()
