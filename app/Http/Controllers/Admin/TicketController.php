@@ -77,7 +77,6 @@ class TicketController extends Controller
         ]);
 
         $attachmentPath = null;
-
         $ticket = Ticket::findOrFail($id);
 
         $resposta = Resposta::create([
@@ -85,7 +84,7 @@ class TicketController extends Controller
             'user_id' => Auth::id(),
             'content' => $request->content,
             'attachment_path' => $attachmentPath,
-            'is_read' => 0,
+            'is_read' => 0, // Inicialmente a resposta é não lida
         ]);
 
         // Verifica se um anexo foi enviado
@@ -99,6 +98,8 @@ class TicketController extends Controller
 
         // Notificação quando a resposta for adicionada
         session()->flash('success', 'Resposta enviada com sucesso!');
+
+        session()->flash('new_response', 'Teste de notificacao');
         
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Resposta enviada!');
@@ -114,6 +115,8 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($id);
         $ticket->status = $request->status;
         $ticket->save();
+
+        session()->flash('status_update', 'Status do ticket atualizado com sucesso!');
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Status atualizado!');
     }

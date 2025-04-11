@@ -34,6 +34,8 @@ Route::middleware(['auth'])->prefix('cliente')->group(function () {
     ->name('cliente.ticket.reply');
     Route::get('/ticket/{id}/respostas', [ClienteTicketController::class, 'respostasJson'])->name('cliente.ticket.respostas');
     Route::post('/ticket/resposta/{id}/mark-read', [ClienteTicketController::class, 'markRespostaAsRead']);
+    Route::post('/admin/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.markAsRead');
+
 
 
 

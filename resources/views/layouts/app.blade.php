@@ -11,11 +11,86 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <style>
+            /* Animação de fade-in e fade-out */
+            .transition-transform {
+                transition: transform 0.3s ease, opacity 0.3s ease;
+            }
+
+            .scale-100 {
+                transform: scale(1);
+            }
+
+            .opacity-0 {
+                opacity: 0;
+            }
+
+            /* Adiciona transição de fade-out nas notificações */
+            .notification {
+                transition: opacity 1s ease-out;
+            }
+
+            .notification.hidden {
+                opacity: 0;
+                pointer-events: none; /* Evita que a notificação ainda receba eventos ao desaparecer */
+            }
+
+            #notifications-container .notification {
+                animation: slideIn 0.5s ease-in-out;
+            }
+
+            @keyframes slideIn {
+                0% {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                100% {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+ 
+        </style>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://unpkg.com/lucide@latest"></script>
     </head>
     <body class="font-sans antialiased">
+
+        <div id="notifications-container" class="fixed bottom-5 right-5 z-50 space-y-4">
+            @foreach (Auth::user()->unreadNotifications as $notification)
+                <div class="notification bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-lg shadow-xl flex items-center justify-between transform transition-all duration-300 ease-in-out hover:scale-105" id="notification-{{ $notification->id }}">
+                    <div class="flex flex-col">
+                        <p class="font-semibold text-lg">{{ $notification->data['user_name'] }} {{ $notification->data['action'] }} o ticket "{{ $notification->data['ticket_title'] }}"</p>
+                        <a href="{{ route('admin.tickets.show', $notification->data['ticket_id']) }}" class="text-white text-sm mt-1 underline hover:text-blue-200">Ver Ticket</a>
+                    </div>
+                    
+                    <!-- Botão de Fechar -->
+                    <button onclick="closeNotificationButton('notification-{{ $notification->id }}')" class="text-white ml-4 hover:text-red-600 focus:outline-none">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            @endforeach
+        </div>
+        
+        
+            
+        <!-- Adicione as notificações no topo do layout -->
+        <div id="notifications-container" class="fixed bottom-5 right-5 z-50">
+            @if (session('status_update'))
+                <div class="bg-blue-500 text-white text-center py-3 px-6 rounded shadow-lg transition-transform transform scale-100 opacity-100" id="statusNotification">
+                    {{ session('status_update') }}
+                </div>
+            @endif
+
+            @if (session('new_response'))
+                <div class="bg-green-500 text-white text-center py-3 px-6 rounded shadow-lg transition-transform transform scale-100 opacity-100" id="responseNotification">
+                    {{ session('new_response') }}
+                </div>
+            @endif
+        </div>
+
         @if (session('success'))
             <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-2 rounded shadow mb-4">
                 {{ session('success') }}
@@ -57,4 +132,31 @@
         </script>
         
     </body>
+    <script>
+        // Função para fechar as notificações automaticamente após 5 segundos
+        function closeNotification(notificationId) {
+            setTimeout(() => {
+                const notification = document.getElementById(notificationId);
+                if (notification) {
+                    notification.classList.add('hidden');  // Aplica o efeito de fade-out
+                }
+            }, 5000); // 5 segundos
+        }
+
+        // Função para fechar as notificações
+        function closeNotificationButton(notificationId) {
+            const notification = document.getElementById(notificationId);
+            if (notification) {
+                notification.classList.add('hidden');  // Aplica o efeito de fade-out
+            }
+        }
+
+        // Fecha as notificações ao carregar a página
+        document.addEventListener('DOMContentLoaded', function () {
+            @foreach (Auth::user()->unreadNotifications as $notification)
+                closeNotification('notification-{{ $notification->id }}');
+            @endforeach
+        });
+    </script>
+    
 </html>

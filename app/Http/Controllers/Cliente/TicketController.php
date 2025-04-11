@@ -11,6 +11,9 @@ use App\Models\Categoria;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use App\Models\Resposta;
+use App\Notifications\TicketActionNotification;
+use Illuminate\Support\Facades\Notification;
+use App\Models\User;
 
 class TicketController extends Controller
 {
@@ -38,6 +41,11 @@ class TicketController extends Controller
 
         $categorias = Categoria::all();
 
+        // Contar as respostas não lidas
+        foreach ($tickets as $ticket) {
+            $ticket->unread_responses_count = $ticket->respostas()->where('is_read', false)->count();
+        }
+
         return view('cliente.dashboard', compact('tickets', 'categorias'));
 
     }
@@ -57,7 +65,7 @@ class TicketController extends Controller
             'categoria_id' => 'nullable|exists:categorias,id',
         ]);
 
-        Ticket::create([
+        $ticket = Ticket::create([
             'title' => $request->title,
             'description' => $request->description,
             'priority' => $request->priority,
@@ -65,6 +73,10 @@ class TicketController extends Controller
             'user_id' => auth()->id(),
             'status' => 'open',
         ]);
+
+        // Enviar notificação para administradores
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new TicketActionNotification($ticket, 'created'));
 
         return redirect()->route('cliente.dashboard')->with('success', 'Ticket criado com sucesso!');
     }
@@ -123,6 +135,10 @@ class TicketController extends Controller
             $resposta->attachment = $attachmentPath;
             $resposta->save();
         }
+
+        // Enviar notificação para administradores
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new TicketActionNotification($ticket, 'responded'));
 
         return redirect()->route('cliente.ticket.show', $ticket->id)->with('success', 'Resposta enviada!');
     }
