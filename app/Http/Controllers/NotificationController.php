@@ -1,9 +1,10 @@
 <?php
-use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Routing\Controller;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Notification;
-use App\Models\Notification as AppNotification;
+namespace App\Http\Controllers;
+
+
+use Illuminate\Notifications\DatabaseNotification;  // Importando o modelo correto
+use Illuminate\Http\Request;
+
 
 
 class NotificationController extends Controller
@@ -11,7 +12,7 @@ class NotificationController extends Controller
     // Marcar como lida
     public function markAsRead($id)
     {
-        $notification = AppNotification::findOrFail($id);
+        $notification = DatabaseNotification::findOrFail($id);  // Usando DatabaseNotification
         $notification->markAsRead();  // Marca a notificação como lida
         
         return redirect()->back()->with('success', 'Notificação marcada como lida.');

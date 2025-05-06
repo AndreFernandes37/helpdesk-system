@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cliente\TicketController as ClienteTicketController;
 use App\Http\Controllers\Admin\AdminController;
@@ -34,7 +35,7 @@ Route::middleware(['auth'])->prefix('cliente')->group(function () {
     ->name('cliente.ticket.reply');
     Route::get('/ticket/{id}/respostas', [ClienteTicketController::class, 'respostasJson'])->name('cliente.ticket.respostas');
     Route::post('/ticket/resposta/{id}/mark-read', [ClienteTicketController::class, 'markRespostaAsRead']);
-    Route::post('/admin/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.markAsRead');
+    Route::post('/cliente/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('cliente.notifications.markAsRead');
 
 
 
@@ -56,6 +57,8 @@ Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->group(func
     Route::patch('/users/{id}/toggle-active', [UserController::class, 'toggleActive'])->name('admin.users.toggle');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy');
     Route::get('/users/{id}', [UserController::class, 'show'])->name('admin.users.show');
+    Route::post('/admin/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('admin.notifications.markAsRead');
+
 });
 
 
