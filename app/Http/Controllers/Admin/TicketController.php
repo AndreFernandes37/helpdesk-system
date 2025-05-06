@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\Resposta;
 use App\Models\User;
+use App\Notifications\TicketActionNotification;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -69,6 +71,31 @@ class TicketController extends Controller
         return view('admin.tickets.show', compact('ticket'));
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'priority' => 'required|in:low,medium,high',
+            'categoria_id' => 'nullable|exists:categorias,id',
+        ]);
+
+        $ticket = Ticket::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'priority' => $request->priority,
+            'categoria_id' => $request->categoria_id,
+            'user_id' => auth()->id(),
+            'status' => 'open',
+        ]);
+
+        // Enviar notificação para administradores
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new TicketActionNotification($ticket, 'created'));
+
+        return redirect()->route('cliente.dashboard')->with('success', 'Ticket criado com sucesso!');
+    }
+
     public function responder(Request $request, $id)
     {
         $request->validate([
@@ -96,10 +123,13 @@ class TicketController extends Controller
             $resposta->save();
         }
 
+        // Enviar notificação para administradores
+        $clientes = User::where('role', 'client')->get();
+        Notification::send($clientes, new TicketActionNotification($ticket, 'responded'));
+
         // Notificação quando a resposta for adicionada
         session()->flash('success', 'Resposta enviada com sucesso!');
 
-        session()->flash('new_response', 'Teste de notificacao');
         
 
         return redirect()->route('admin.tickets.show', $ticket->id)->with('success', 'Resposta enviada!');
