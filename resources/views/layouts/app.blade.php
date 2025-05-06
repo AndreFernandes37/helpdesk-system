@@ -49,6 +49,64 @@
                     opacity: 1;
                 }
             }
+
+
+           /* resources/css/app.css ou dentro de <style> no seu arquivo Blade */
+
+            /* Estilos para o botão de notificações */
+            /* Estilos para o botão de notificações */
+            #notifications-button {
+                position: relative;
+            }
+
+            /* Estilos para o badge de notificações */
+            #notifications-button span {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 10px;
+                height: 10px;
+                background-color: red;
+                border-radius: 50%;
+            }
+
+            /* Estilos para o dropdown de notificações */
+            #notifications-dropdown {
+                display: none;  /* Inicialmente escondido */
+                background-color: white;
+                border-radius: 8px;
+                max-width: 300px;
+                padding: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+            }
+
+            #notifications-dropdown ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            #notifications-dropdown li {
+                border-bottom: 1px solid #e2e2e2;
+            }
+
+            #notifications-dropdown a {
+                text-decoration: none;
+                color: #333;
+                display: block;
+                padding: 8px 16px;
+            }
+
+            #notifications-dropdown button {
+                background-color: transparent;
+                border: none;
+                cursor: pointer;
+            }
+
+
+
+
  
         </style>
 

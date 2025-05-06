@@ -35,6 +35,44 @@
                 </button>
             </div>
 
+                        <!-- Navbar -->
+                        <!-- Dropdown de Notificações na Navbar -->
+            <!-- Navbar -->
+            <!-- Navbar -->
+            <div class="flex items-center">
+                <button class="relative" id="notifications-button">
+                    <!-- Ícone de Notificações -->
+                    <i data-lucide="bell" class="w-6 h-6 text-gray-600"></i>
+
+                    <!-- Badge para notificações não lidas -->
+                    @if (Auth::user()->unreadNotifications->count() > 0)
+                        <span class="absolute top-0 right-0 block w-2.5 h-2.5 bg-red-600 rounded-full"></span>
+                    @endif
+                </button>
+
+                <!-- Dropdown de Notificações -->
+                <div id="notifications-dropdown" class="absolute top-12 right-0 mt-2 w-64 bg-white shadow-lg rounded-lg overflow-hidden z-50 hidden">
+                    <ul class="list-none p-0 m-0">
+                        @foreach (Auth::user()->unreadNotifications as $notification)
+                            <li class="border-b" id="notification-{{ $notification->id }}">
+                                <a href="{{ route('admin.tickets.show', $notification->data['ticket_id']) }}" class="block px-4 py-2 text-sm text-gray-700">
+                                    {{ $notification->data['user_name'] }} {{ $notification->data['action'] }} o ticket "{{ $notification->data['ticket_title'] }}"
+                                </a>
+                                <form action="{{ route('admin.notifications.markAsRead', $notification->id) }}" method="POST" class="px-4 py-2 text-sm">
+                                    @csrf
+                                    <button type="submit" class="text-red-600">Fechar</button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+
+
+
+
+
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
@@ -115,3 +153,50 @@
         </div>
     </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Referência ao botão de notificação
+        const notificationsButton = document.getElementById('notifications-button');
+        // Referência ao dropdown de notificações
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+
+        // Verifica se o botão e o dropdown existem
+        if (notificationsButton && notificationsDropdown) {
+            notificationsButton.addEventListener('click', function () {
+                // Alterna o display do dropdown de notificações entre 'none' e 'block'
+                if (notificationsDropdown.style.display === 'block') {
+                    notificationsDropdown.style.display = 'none';  // Esconde o dropdown
+                } else {
+                    notificationsDropdown.style.display = 'block';  // Exibe o dropdown
+                }
+            });
+        }
+
+        // Função para fechar a notificação
+        function closeNotificationButton(notificationId) {
+            const notification = document.getElementById(notificationId);
+            if (notification) {
+                notification.classList.add('hidden'); // Fecha a notificação
+            }
+        }
+
+        // Fechar o dropdown automaticamente após 5 segundos
+        function closeDropdownAutomatically() {
+            setTimeout(() => {
+                const dropdown = document.getElementById('notifications-dropdown');
+                if (dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';  // Fecha o dropdown após 5 segundos
+                }
+            }, 5000); // 5 segundos
+        }
+
+        // Quando a página carrega, chama a função para esconder o dropdown após 5 segundos
+        window.onload = () => {
+            closeDropdownAutomatically();
+        }
+    });
+</script>
+
+
+
