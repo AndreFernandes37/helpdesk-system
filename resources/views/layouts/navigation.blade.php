@@ -55,13 +55,29 @@
                     <ul class="list-none p-0 m-0">
                         @foreach (Auth::user()->unreadNotifications as $notification)
                             <li class="border-b" id="notification-{{ $notification->id }}">
-                                <a href="{{ route('admin.tickets.show', $notification->data['ticket_id']) }}" class="block px-4 py-2 text-sm text-gray-700">
-                                    {{ $notification->data['user_name'] }} {{ $notification->data['action'] }} o ticket "{{ $notification->data['ticket_title'] }}"
-                                </a>
-                                <form action="{{ route('admin.notifications.markAsRead', $notification->id) }}" method="POST" class="px-4 py-2 text-sm">
-                                    @csrf
-                                    <button type="submit" class="text-red-600">Fechar</button>
-                                </form>
+
+
+                                @auth
+                                    @if (Auth::user()->role === 'client')
+                                        <a href="{{ route('cliente.ticket.show', $notification->data['ticket_id']) }}" class="block px-4 py-2 text-sm text-gray-700">
+                                            {{ $notification->data['user_name'] }} {{ $notification->data['action'] }} o ticket "{{ $notification->data['ticket_title'] }}"
+                                        </a>
+                                        <form action="{{ route('cliente.notifications.markAsRead', $notification->id) }}" method="POST" class="px-4 py-2 text-sm">
+                                            @csrf
+                                            <button type="submit" class="text-red-600">Fechar</button>
+                                        </form>
+                                    @elseif (Auth::user()->role === 'admin')
+
+                                        <a href="{{ route('admin.tickets.show', $notification->data['ticket_id']) }}" class="block px-4 py-2 text-sm text-gray-700">
+                                            {{ $notification->data['user_name'] }} {{ $notification->data['action'] }} o ticket "{{ $notification->data['ticket_title'] }}"
+                                        </a>
+                                        <form action="{{ route('admin.notifications.markAsRead', $notification->id) }}" method="POST" class="px-4 py-2 text-sm">
+                                            @csrf
+                                            <button type="submit" class="text-red-600">Fechar</button>
+                                        </form>
+                                    @endif
+                                @endauth
+                                
                             </li>
                         @endforeach
                     </ul>
